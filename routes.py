@@ -1,12 +1,11 @@
-from http.client import HTTPException
 from typing import List, Optional
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 from googletrans import Translator
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING, DESCENDING
 
 from db import get_db
+from shemas.request import SortingOrder
 from shemas.response import WordDetails, WordOnly
 
 router = APIRouter()
@@ -41,7 +40,7 @@ async def list_words(
     skip: int = 0,
     limit: int = 10,
     word: Optional[str] = None,
-    sort: Optional[str] = "asc",
+    sort: Optional[SortingOrder] = SortingOrder.ASC,
     include_details: Optional[bool] = False,
     db: AsyncIOMotorClient = Depends(get_db)
 ):
@@ -49,7 +48,7 @@ async def list_words(
     if word:
         query["word"] = {"$regex": word, "$options": "i"}
 
-    sort_order = ASCENDING if sort == "asc" else DESCENDING
+    sort_order = ASCENDING if sort == SortingOrder.ASC else DESCENDING
     cursor = db.words.find(query).skip(skip).limit(limit).sort("word", sort_order)
     if include_details:
         return [WordDetails(**word) async for word in cursor]
