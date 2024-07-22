@@ -1,9 +1,5 @@
 build
-docker-compose up --build
-
-run
-
-docker-compose up -d
+docker-compose up --build -d
 
 
 http://0.0.0.0:8000/docs -swagger
